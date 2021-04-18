@@ -95,6 +95,8 @@ int servidor(int unSocket) {
 
 	t_buffer* buffer = crearBufferPersona(persona);
 
+	//Aqui ya estaria serializado nuestra persona pero lo vamos a empaquetar, agregarle el header al principio asi ya viendo el header se sabe que es una persona.
+
 	t_paquete* paquete = crearPaquete(buffer);
 
 	void* a_enviar = prepararParaEnviarPaquete(buffer, paquete);
@@ -106,11 +108,6 @@ int servidor(int unSocket) {
 		free(paquete->buffer->stream);
 		free(paquete->buffer);
 		free(paquete);
-
-
-	//Aqui ya estaria serializado nuestra persona pero lo vamos a empaquetar, agregarle el header al principio asi ya viendo el header se sabe que es una persona.
-
-
 
 	return EXIT_SUCCESS;
 }
