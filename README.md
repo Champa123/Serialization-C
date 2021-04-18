@@ -19,5 +19,7 @@ Esta es una guía de una serialización en C.
  
  
  
+For further info:
+https://docs.google.com/document/d/190LLBTzHkFmD_yS8OWcUsJoIOQVKxJkUxIFtcnChr-g/edit#
 
 
