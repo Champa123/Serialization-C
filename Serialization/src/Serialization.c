@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 
+
+
 typedef struct {
     int dni;
     int edad;
@@ -23,16 +25,13 @@ typedef struct {
 
 const PERSONA = 0;
 
+
 t_buffer* crearBufferPersona(t_persona* persona){
 
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 
 	buffer->size = calcularTamanioBufferPersona(persona);
 	buffer->stream = armarStream(persona, buffer->size);
-
-
-	// Si usamos memoria dinámica para el nombre, y no la precisamos más, ya podemos liberarla:
-	free(persona->nombre); //   ¡! ¡! ¡! ¡! ¡! ¡!
 
 	return buffer;
 }
@@ -99,15 +98,22 @@ int servidor(int unSocket) {
 
 	t_paquete* paquete = crearPaquete(buffer);
 
-	void* a_enviar = prepararParaEnviarPaquete(buffer, paquete);
+	void* a_enviar = prepararParaEnviarPaquete(buffer, paquete);// 4 mallocs
+
 	// Por último enviamos
 		send(unSocket, a_enviar, buffer->size + sizeof(int) + sizeof(int), 0);
 
 		// No nos olvidamos de liberar la memoria que ya no usaremos
+		free(persona);
 		free(a_enviar);
 		free(paquete->buffer->stream);
 		free(paquete->buffer);
 		free(paquete);
+
+
+
+
+
 
 	return EXIT_SUCCESS;
 }
@@ -131,6 +137,7 @@ int cliente(int unSocket){
 
 	        // Hacemos lo que necesitemos con esta info
 	        // Y eventualmente liberamos memoria
+	        free(persona-> nombre);
 	        free(persona);
 
 	        break;
