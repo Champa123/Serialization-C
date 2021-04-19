@@ -1,7 +1,7 @@
+
 #include <stdio.h>
 #include <stdlib.h>
-
-
+#include <string.h>
 
 
 typedef struct {
@@ -23,18 +23,9 @@ typedef struct {
     t_buffer* buffer;
 } t_paquete;
 
-const PERSONA = 0;
+const int PERSONA = 0;
 
 
-t_buffer* crearBufferPersona(t_persona* persona){
-
-	t_buffer* buffer = malloc(sizeof(t_buffer));
-
-	buffer->size = calcularTamanioBufferPersona(persona);
-	buffer->stream = armarStream(persona, buffer->size);
-
-	return buffer;
-}
 
 int calcularTamanioBufferPersona(t_persona* persona){
 
@@ -64,10 +55,19 @@ void* armarStream(t_persona* persona, int bufferSize){
 }
 
 
+t_buffer* crearBufferPersona(t_persona* persona){
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+
+	buffer->size = calcularTamanioBufferPersona(persona);
+	buffer->stream = armarStream(persona, buffer->size);
+
+	return buffer;
+}
 
 
 t_paquete* crearPaquete(t_buffer* buffer){
-	t_paquete paquete = malloc(sizeof(t_paquete));
+	t_paquete* paquete = malloc(sizeof(t_paquete));
 
 	paquete->codigo_operacion = PERSONA; // Podemos usar una constante por operación
 	paquete->buffer = buffer; // Nuestro buffer de antes.
@@ -98,7 +98,7 @@ int servidor(int unSocket) {
 
 	t_paquete* paquete = crearPaquete(buffer);
 
-	void* a_enviar = prepararParaEnviarPaquete(buffer, paquete);// 4 mallocs
+	void* a_enviar = prepararParaEnviarPaquete(buffer, paquete);
 
 	// Por último enviamos
 		send(unSocket, a_enviar, buffer->size + sizeof(int) + sizeof(int), 0);
@@ -118,39 +118,7 @@ int servidor(int unSocket) {
 	return EXIT_SUCCESS;
 }
 
-int cliente(int unSocket){
-	t_paquete* paquete = malloc(sizeof(t_paquete));
-	paquete->buffer = malloc(sizeof(t_buffer));
 
-	// Primero recibimos el codigo de operacion
-	recv(unSocket, &(paquete->codigo_operacion), sizeof(int), 0);
-
-	// Después ya podemos recibir el buffer. Primero su tamaño seguido del contenido
-	recv(unSocket, &(paquete->buffer->size), sizeof(int), 0);
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	recv(unSocket, paquete->buffer->stream, paquete->buffer->size, 0);
-
-	// Ahora en función del código recibido procedemos a deserializar el resto
-	switch(paquete->codigo_operacion) {
-	    case PERSONA:
-	        t_persona* persona = deserializar_persona(paquete->buffer);
-
-	        // Hacemos lo que necesitemos con esta info
-	        // Y eventualmente liberamos memoria
-	        free(persona-> nombre);
-	        free(persona);
-
-	        break;
-	    // Evaluamos los demás casos según corresponda
-	}
-
-	// Liberamos memoria
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
-	free(paquete);
-
-	return EXIT_SUCCESS;
-}
 
 t_persona* deserializar_persona(t_buffer* buffer) {
     t_persona* persona = malloc(sizeof(t_persona));
@@ -171,4 +139,43 @@ t_persona* deserializar_persona(t_buffer* buffer) {
     memcpy(persona->nombre, stream, persona->long_nombre);
 
     return persona;
+}
+
+int cliente(int unSocket){
+	t_paquete* paquete = malloc(sizeof(t_paquete));
+	paquete->buffer = malloc(sizeof(t_buffer));
+
+	// Primero recibimos el codigo de operacion
+	recv(unSocket, &(paquete->codigo_operacion), sizeof(int), 0);
+
+	// Después ya podemos recibir el buffer. Primero su tamaño seguido del contenido
+	recv(unSocket, &(paquete->buffer->size), sizeof(int), 0);
+	paquete->buffer->stream = malloc(paquete->buffer->size);
+	recv(unSocket, paquete->buffer->stream, paquete->buffer->size, 0);
+
+	// Ahora en función del código recibido procedemos a deserializar el resto
+	switch(paquete->codigo_operacion) {
+	    case 0:  //PERSONA:
+	    	;
+	        t_persona* persona = deserializar_persona(paquete->buffer);
+
+	        // Hacemos lo que necesitemos con esta info
+	        // Y eventualmente liberamos memoria
+	        free(persona-> nombre);
+	        free(persona);
+
+	        break;
+	    // Evaluamos los demás casos según corresponda
+	}
+
+	// Liberamos memoria
+	free(paquete->buffer->stream);
+	free(paquete->buffer);
+	free(paquete);
+
+	return EXIT_SUCCESS;
+}
+
+int main(){
+	return EXIT_SUCCESS;
 }
